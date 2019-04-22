@@ -52,7 +52,6 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
 db.sqlite3
 
@@ -102,3 +101,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Custom list of files to ignore
+logs/**
+jobs/**
+resources/domain_map.json
+*.bat

@@ -89,7 +89,7 @@ FIELDNAMES = {
   'groups': ['samaccountname', 'name', 'userprinciplename', 'objectsid', 'primarygroupid', 'description', 'memberof', 'adspath'],
   'ous': ['name', 'managedby', 'description', 'gpos', 'gplink', 'adspath'],
   'trusts': ['trustdirection', 'flatname', 'trustpartner', 'adspath'],
-  'users': ['samaccountname', 'name', 'userprinciplename', 'lastlogon', 'pwdlastset', 'useraccountcontrol', 'memberof', 'description', 'objectsid', 'primarygroupid', 'adspath', 'plaintext', 'ntlm', 'aes128', 'aes256', 'comment']
+  'users': ['samaccountname', 'name', 'userprinciplename', 'lastlogon', 'pwdlastset', 'useraccountcontrol', 'homedirectory', 'memberof', 'description', 'profilepath', 'objectsid', 'primarygroupid', 'adspath', 'plaintext', 'ntlm', 'aes128', 'aes256', 'comment']
 }
 
 # Art Source: https://www.asciiart.eu/mythology/grim-reapers
@@ -718,7 +718,7 @@ def write_commands():
       
       write_success = True
     except IOError as e:
-      pprint(e)
+      log(e)
       # Warn user, allow them to close the file, and try to save again, rather than lose all the data that was processed
       raw_input('[-] Write failed; do you have the file open?')
 
@@ -756,7 +756,7 @@ def write_all_credentials():
       
       write_success = True
     except IOError as e:
-      pprint(e)
+      log(e)
       # Warn user, allow them to close the file, and try to save again, rather than lose all the data that was processed
       raw_input('[-] Write failed; do you have the file open?')
 
@@ -774,7 +774,7 @@ def write_all_credentials():
           
         write_success = True
       except IOError as e:
-        pprint(e)
+        log(e)
         # Warn user, allow them to close the file, and try to save again, rather than lose all the data that was processed
         raw_input('[-] Write failed; do you have the file open?')
 
@@ -843,7 +843,7 @@ def write_domain_data():
               
               write_success = True
             except IOError as e:
-              pprint(e)
+              log(e)
               # Warn user, allow them to close the file, and try to save again, rather than lose all the data that was processed
               raw_input('[-] Write failed; do you have the file open?')
 
@@ -913,7 +913,7 @@ def write_host_data():
                 writer.writerows(instance)
                 write_success = True
             except IOError as e:
-              pprint(e)
+              log(e)
               # Warn user, allow them to close the file, and try to save again, rather than lose all the data that was processed
               raw_input('[-] Write failed; do you have the file open?')
     
@@ -935,7 +935,7 @@ def write_host_data():
           
           write_success = True
         except IOError as e:
-          pprint(e)
+          log(e)
           # Warn user, allow them to close the file, and try to save again, rather than lose all the data that was processed
           # Doubt this will ever happen with flat text files, but why risk it?
           raw_input('[-] Write failed; do you have the file open?')
@@ -998,7 +998,14 @@ def parse_session_metadata(filepath):
       host['arch'] = beacon_metadata['host_arch']
       host['services'] = []
       host['text'] = {}
-
+      
+      # Correct IP for local connection
+      if host['ip'] == '127.0.0.1' and host['hostname'] in aggregator_vars['dns_lookup']:
+        host['ip'] = aggregator_vars['dns_lookup'][host['hostname']]
+      else:
+        # Store IP in dns_lookup for future corrections
+        aggregator_vars['dns_lookup'][host['hostname']] = host['ip']
+      
       if not host_id in aggregator_vars['hosts']:
         aggregator_vars['hosts'][host_id] = host
       
@@ -1013,6 +1020,7 @@ def parse_session_metadata(filepath):
       session['beacon_id'] = beacon_id
       session['filepath'] = filepath
       
+      
       if not session_id in aggregator_vars['sessions']:
         aggregator_vars['sessions'][session_id] = session
       else:
@@ -1026,18 +1034,16 @@ def parse_session_metadata(filepath):
         del current_session['filepath']
         
         if current_session != existing_session:
-          print('Saved Session')
-          pprint(aggregator_vars['sessions'][session_id])
-          print('Current Session:')
-          pprint(session)
+          debug('Saved Session', aggregator_vars['sessions'][session_id])
+          debug('Current Session:', session)
           error('[*] Unique sessions detected with the same ID (%s)' % session_id)
     elif session_id in aggregator_vars['sessions']:
       # First line does NOT contain session metadata, but the session data can be determined based on the teamserver IP and beacon ID (which form the session_id)
       session = aggregator_vars['sessions'][session_id]
     else:
       # Beacon log does not contain session metadata and a matching session could not be found in the session list
-      error('Session from unknown host (%s)' % filepath, fatal=False)
-      pprint(aggregator_vars['sessions'])
+      warn('Session from unknown host (%s)' % filepath)
+      debug('', aggregator_vars['sessions'])
       return None
   
   return session_id

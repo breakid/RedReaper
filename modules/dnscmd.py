@@ -92,7 +92,7 @@ def parse_output(host, tstamp, output, global_vars):
           global_vars['dns_lookup'][fqdn] = ip
     
     # Save raw text output to a file in case unparsed data is required
-    filepath = '..\\..\\..\\{0}\\dns\\{0}_{1}_zoneprint.txt'.format(zone, timestamp_to_filename(tstamp))
+    filepath = '..\\..\\dns\\{0}_{1}_zoneprint.txt'.format(zone, timestamp_to_filename(tstamp))
     host['text'][filepath] = output
     
     return True

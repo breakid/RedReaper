@@ -204,7 +204,7 @@ def merge_cred(cred1, cred2):
     # password, overwrite the old data
     
     # Maintain credential number, if appliable
-    if 'num' in dict1[user]:
+    if 'num' in cred1:
       cred2['num'] = cred1['num']
     
     cred1 = cred2

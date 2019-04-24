@@ -259,6 +259,9 @@ def enrich_creds(cred, technique, host, tstamp):
   cred['source_history'] = '%s on %s @ %s' % (technique, host['id'], tstamp)
   if 'comment' not in cred: cred['comment'] = ''
   
+  if cred['ntlm'] == '31D6CFE0D16AE931B73C59D7E0C089C0':
+    cred['plaintext'] = '[BLANK]'
+  
   return {id: cred}
 
 
